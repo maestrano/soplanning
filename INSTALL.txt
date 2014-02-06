@@ -1,0 +1,79 @@
+SO Planning Installation Guide
+------------------------------
+
+----------------------------------------------------------
+ENGLISH
+You need first a PHP/MYSQL environment.
+If you don't have, you can try www.wampserver.com on Windows or install Apache and Mysql packages on linux.
+PHP5.2 or higher is needed.
+On Linux, don't forget to install the right locale : ISO-8859-1
+
+1. Unpack your download
+
+   Unzip the SOPlanning file.
+   Only the www directory must be browsable under Apache, so point the web access to the www directly.
+
+2. Install database
+
+	use sql/planninq_my.sql to install the database on mysql
+	Start phpMyAdmin (see your administrator to have access to this tool), create a new database "soplanning" (collation "latin1_general_ci"). Then execute the file planning_my.sql
+	IMPORTANT : IF YOU'RE UPGRADING, DON'T FORGET TO HAVE A DATABASE BACKUP BEFORE
+
+3. Configure SO Planning
+
+	Edit the file config.inc :
+	- change database parameters
+	- verify path of COMPIL_DIR, and give read/write access to this directory
+	- verify PHP safe mode status : safe mode must be disabled to allow smarty template engine to manage cache files
+
+4. Browse to the SO Planning www directory using a web browser.
+
+	Use admin / admin to connect the first time.
+	Do not forget to change it after.
+
+5. Give any feedback, problem, suggestion.
+
+	support@soplanning.org
+	Rodolphe, France
+
+
+IF YOU NEED TO UPGRADE AN EXISTING VERSION :
+
+
+
+-----------------------------------------------------------------
+FRANCAIS
+Vous devez auparavant avoir un environnement PHP/MYSQL pour héberger l'application.
+Si vous n'en avez pas, vous pouvez par exemple essayer www.wampserver.com pour Windows ou installer les packages Apache et Mysql pour linux.
+PHP5.2 ou plus est requis.
+Sous Linux, ne pas oublier d'installer la locale ISO-8859-1.
+
+1. Décompresser l'archive contenant l'application
+
+   Dézippez le fichier soplanning.zip à l'endroit désiré.
+   Seul le répertoire www doit être accessible par un navigateur, donc pointez l'accès web à l'application directement sur ce répertoire www.
+
+2. Installez la base de données
+
+	Utilisez le fichier sql/planninq_my.sql pour installer la base dans mysql
+	Connectez-vous sur phpMyAdmin (demandez l'accès à votre administrateur), créez une nouvelle base de données "soplanning" (collation "latin1_general_ci"). Ensuite, executez le fichier planning_my.sql
+	OU
+	Utilisez le fichier sql/planning_postgre.sql pour installer la base dans postgresql
+	IMPORTANT : SI VOUS FAITES UNE MISE A JOUR DE VOTRE VERSION, PENSEZ A EXECUTER TOUS LES SCRIPTS SQL SITUES DANS /upgrade/
+
+3. Configurez SO Planning
+
+	Editez le fichier config.inc :
+	- changez les paramètres de connexion à la base de données
+	- vérifiez le chemin situé dans la variable COMPIL_DIR, et donnez les droits d'écriture/lecture pour ce répertoire.
+	- vérifier le safe mode de PHP : le safe mode doit être désactivé pour permettre à Smarty (moteur de template) de gérer ses fichiers de cache
+
+4. Accédez au répertoire www de SO Planning avec votre navigateur web
+
+	Utilisez le login admin / admin pour vous connecter la première fois.
+	N'oubliez pas de changer ce mot de passe par la suite.
+
+5. Donnez votre opinion, rapportez vos problèmes, et faites des suggestions.
+
+	support@soplanning.org
+	Rodolphe, France
