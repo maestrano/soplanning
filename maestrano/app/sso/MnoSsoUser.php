@@ -37,29 +37,17 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return boolean whether the user was successfully set in session or not
    */
-  // protected function setInSession()
-  // {
-  //   // First set $conn variable (need global variable?)
-  //   $conn = $this->connection;
-  //   
-  //   $sel1 = $conn->query("SELECT ID,name,lastlogin FROM user WHERE ID = $this->local_id");
-  //   $chk = $sel1->fetch();
-  //   if ($chk["ID"] != "") {
-  //       $now = time();
-  //       
-  //       // Set session
-  //       $this->session['userid'] = $chk['ID'];
-  //       $this->session['username'] = stripslashes($chk['name']);
-  //       $this->session['lastlogin'] = $now;
-  //       
-  //       // Update last login timestamp
-  //       $upd1 = $conn->query("UPDATE user SET lastlogin = '$now' WHERE ID = $this->local_id");
-  //       
-  //       return true;
-  //   } else {
-  //       return false;
-  //   }
-  // }
+  protected function setInSession()
+  {
+    if ($this->local_id) {
+        // Set session
+        $this->session['user_id'] = $this->local_id;
+        
+        return true;
+    } else {
+        return false;
+    }
+  }
   
   
   /**
@@ -69,52 +57,109 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return the ID of the user created, null otherwise
    */
-  // protected function createLocalUser()
-  // {
-  //   $lid = null;
-  //   
-  //   if ($this->accessScope() == 'private') {
-  //     // First set $conn variable (need global variable?)
-  //     $conn = $this->connection;
-  //     
-  //     // Create user
-  //     $lid = $this->connection->query("CREATE BLA.....");
-  //   }
-  //   
-  //   return $lid;
-  // }
+  protected function createLocalUser()
+  {
+    $lid = null;
+    
+    if ($this->accessScope() == 'private') {
+      // Build user
+      $user = $this->buildLocalUser();
+      
+      // Save user and retrieve id if successful
+      if ($user->db_save()) {
+        $lid = $user->user_id;
+      }
+      
+    }
+    
+    return $lid;
+  }
+  
+  /**
+   * Build a user for creation.
+   *
+   * @return a SoPlanning user object
+   */
+  protected function buildLocalUser()
+  {
+    $user = new User();
+    
+  	$user->user_id = $this->uid;
+  	$user->nom = "$this->name $this->surname";
+  	$user->email = $this->email;
+  	$user->user_groupe_id = null;
+  	$user->login = $this->uid;
+  	$user->password = sha1("¤" . $this->generatePassword() . "¤");
+    $user->visible_planning = 'oui';
+  	$user->notifications = 'non';
+  	$user->couleur = 'FFFFFF';
+  	$user->setDroits($this->getUserPrivileges());
+    
+    return $user;
+  }
+  
+  /**
+   * Return the privileges to grant to the local user
+   *
+   * @return array of privileges
+   */
+  protected function getUserPrivileges()
+  {
+    $def_admin_rights = ["users_manage_all", "projects_manage_all", "projectgroups_manage_all", "planning_modify_all", "planning_view_all_projects", "parameters_all"];
+    $def_user_rights = ["planning_readonly","planning_view_all_projects"];
+    
+    $role_rights = $def_user_rights; // User
+    
+    if ($this->app_owner) {
+      $role_rights = $def_admin_rights; // Admin
+    } else {
+      foreach ($this->organizations as $organization) {
+        if ($organization['role'] == 'Admin' || $organization['role'] == 'Super Admin') {
+          $role_rights = $def_admin_rights;
+        } else {
+          $role_rights = $def_user_rights;
+        }
+      }
+    }
+    
+    return $role_rights;
+  }
   
   /**
    * Get the ID of a local user via Maestrano UID lookup
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function getLocalIdByUid()
-  // {
-  //   $result = $this->connection->query("SELECT ID FROM user WHERE mno_uid = {$this->connection->quote($this->uid)} LIMIT 1")->fetch();
-  //   
-  //   if ($result && $result['ID']) {
-  //     return $result['ID'];
-  //   }
-  //   
-  //   return null;
-  // }
+  protected function getLocalIdByUid()
+  {
+    $arg = addslashes($this->uid);
+    $result = db_query("SELECT user_id FROM planning_user WHERE mno_uid = '{$arg}' LIMIT 1");
+    $result = db_fetch_assoc($result);
+    
+    if ($result && $result['user_id']) {
+      return $result['user_id'];
+    }
+    
+    return null;
+  }
   
   /**
    * Get the ID of a local user via email lookup
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function getLocalIdByEmail()
-  // {
-  //   $result = $this->connection->query("SELECT ID FROM user WHERE email = {$this->connection->quote($this->email)} LIMIT 1")->fetch();
-  //   
-  //   if ($result && $result['ID']) {
-  //     return $result['ID'];
-  //   }
-  //   
-  //   return null;
-  // }
+  protected function getLocalIdByEmail()
+  {
+    $arg = addslashes($this->email);
+    $result = db_query("SELECT user_id FROM planning_user WHERE email = '{$arg}' LIMIT 1");
+    $result = db_fetch_assoc($result);
+    
+    if ($result && $result['user_id']) {
+      return $result['user_id'];
+    }
+    
+    return null;
+  }
   
   /**
    * Set all 'soft' details on the user (like name, surname, email)
@@ -122,28 +167,36 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return boolean whether the user was synced or not
    */
-   // protected function syncLocalDetails()
-   // {
-   //   if($this->local_id) {
-   //     $upd = $this->connection->query("UPDATE user SET name = {$this->connection->quote($this->name . ' ' . $this->surname)}, email = {$this->connection->quote($this->email)} WHERE ID = $this->local_id");
-   //     return $upd;
-   //   }
-   //   
-   //   return false;
-   // }
+   protected function syncLocalDetails()
+   {
+     if($this->local_id) {
+       $upd = db_query("UPDATE planning_user 
+         SET nom = '" . addslashes($this->name . ' ' . $this->surname) ."',
+         login = '" . addslashes($this->uid) ."', 
+         email = '" . addslashes($this->email) ."'
+         WHERE user_id = '" . addslashes($this->local_id) . "'");
+       
+       return $upd;
+     }
+     
+     return false;
+   }
   
   /**
    * Set the Maestrano UID on a local user via id lookup
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function setLocalUid()
-  // {
-  //   if($this->local_id) {
-  //     $upd = $this->connection->query("UPDATE user SET mno_uid = {$this->connection->quote($this->uid)} WHERE ID = $this->local_id");
-  //     return $upd;
-  //   }
-  //   
-  //   return false;
-  // }
+  protected function setLocalUid()
+  {
+    if($this->local_id) {
+      $upd = db_query("UPDATE planning_user 
+        SET mno_uid = '" . addslashes($this->uid) . "'
+        WHERE user_id = '" . addslashes($this->local_id) . "'");
+      
+      return $upd;
+    }
+    
+    return false;
+  }
 }
