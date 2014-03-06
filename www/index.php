@@ -5,7 +5,7 @@ require_once(BASE . '/../config.inc');
 
 // Hook:Maestrano
 // Load Maestrano
-require BASE . '/../maestrano/app/init/base.php';
+require BASE . '/maestrano/app/init/base.php';
 $maestrano = MaestranoService::getInstance();
 // Require authentication straight away if intranet
 // mode enabled
