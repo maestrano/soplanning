@@ -105,8 +105,8 @@ class MnoSsoUser extends MnoSsoBaseUser
    */
   protected function getUserPrivileges()
   {
-    $def_admin_rights = ["users_manage_all", "projects_manage_all", "projectgroups_manage_all", "planning_modify_all", "planning_view_all_projects", "parameters_all"];
-    $def_user_rights = ["planning_readonly","planning_view_all_projects"];
+    $def_admin_rights = Array("users_manage_all", "projects_manage_all", "projectgroups_manage_all", "planning_modify_all", "planning_view_all_projects", "parameters_all");
+    $def_user_rights = Array("planning_readonly","planning_view_all_projects");
     
     $role_rights = $def_user_rights; // User
     
