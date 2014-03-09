@@ -5,7 +5,7 @@ require BASE . '/../config.inc';
 
 // Hook:Maestrano
 // Load Maestrano
-require BASE . '/../maestrano/app/init/base.php';
+require BASE . '/maestrano/app/init/base.php';
 
 // http://ltb-project.org/wiki/documentation/self-service-password
 function retrieve_ldap_password($login, $password){
