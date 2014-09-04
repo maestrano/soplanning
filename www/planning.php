@@ -7,6 +7,18 @@ $smarty = new MySmarty();
 
 require BASE . '/../includes/header.inc';
 
+// Hook:Maestrano
+// Load Maestrano
+require BASE . '/maestrano/app/init/base.php';
+$maestrano = MaestranoService::getInstance();
+// Check Maestrano session is still valid
+if ($maestrano->isSsoEnabled()) {
+  if (!$maestrano->getSsoSession()->isValid()) {
+    header("Location: " . $maestrano->getSsoInitUrl());
+    exit;
+  }
+}
+
 $html = '';
 $js = '';
 

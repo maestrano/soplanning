@@ -3,6 +3,10 @@
 require 'base.inc';
 require BASE . '/../config.inc';
 
+// Hook:Maestrano
+// Load Maestrano
+require BASE . '/maestrano/app/init/base.php';
+
 // http://ltb-project.org/wiki/documentation/self-service-password
 function retrieve_ldap_password($login, $password){
 
@@ -70,6 +74,14 @@ if(isset($_GET['action']) && $_GET['action'] == 'logout') {
 	unset($_SESSION['user_id']);
 	session_regenerate_id();
 	//session_destroy();
+  
+  // Hook:Maestrano
+  $maestrano = MaestranoService::getInstance();
+  if ($maestrano->isSsoEnabled()) {
+    header("Location: " . $maestrano->getSsoLogoutUrl());
+    exit;
+  }
+  
 	if(CONFIG_LOGOUT_REDIRECT != '') {
 		header('Location: ' . CONFIG_LOGOUT_REDIRECT);
 		exit;
